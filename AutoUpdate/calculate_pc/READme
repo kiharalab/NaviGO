@@ -1,0 +1,51 @@
+1. Create GO_category.txt file
+
+GO_CATEGORY table
+--------------------------------------------------------
+create table GO_CATEGORY as select id,acc,'f'as category from term where term_type='molecular_function' and acc like 'GO%';
+insert into GO_CATEGORY select id,acc,'p' from term where term_type='biological_process' and acc like 'GO%';
+insert into GO_CATEGORY select id,acc,'c' from term where term_type='cellular_component' and acc like 'GO%';
+
+now do select * from GO_CATEGORY into outfile '/tmp/GO_category.txt';
+(you might need to reformat this GO_category.txt file to make it into the same format as "GO_201401_category.txt")
+
+2. Query to GO database in mysql 
+
+SELECT DISTINCT         
+ancestor.acc, term.acc  
+FROM    term   
+INNER JOIN graph_path ON (term.id=graph_path.term2_id)   
+INNER JOIN term AS ancestor ON (ancestor.id=graph_path.term1_id)  
+WHERE term.acc LIKE 'GO:%' AND ancestor.acc LIKE 'GO:%' 
+INTO OUTFILE '/tmp/GO_ALL.txt';
+
+Now split this GO_ALL.txt file into 3 categories-
+ 
+GO_BPO.txt
+GO_CCO.txt
+GO_MFO.txt
+(use the GO_category.txt file created in step 1)
+
+3. Copy the current version of uniprot_sprot.dat into this directory.
+
+4. perl getAncestors.pl
+It will create 3 files
+BPparents.txt
+MFparents.txt
+CCparents.txt
+
+5. perl getChildren.pl
+It will create 3 files
+BPchildren.txt
+MFchildren.txt
+CCchildren.txt
+
+Now follow four steps to compute Combined_pc.txt - 
+
+6. perl 1_go_freq.pl
+7. perl 2_calc_freq_ancestorProp.pl
+8. perl 3_root_anno.pl
+9. perl 4 _calc_pc.pl
+
+finally output will be Combined_pc.txt. Ignore intermediate files. 
+
