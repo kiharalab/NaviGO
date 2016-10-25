@@ -1,0 +1,16 @@
+open(CAS, "<data/CAS.txt") || die "Cannot open CAS\n";
+open(PAS, "<data/PAS.txt") || die "Cannot open PAS\n";
+
+my %cas = ();
+my %pas = ();
+
+while(<CAS>)
+{
+	chomp $_;
+	@line = split(" ", $_);
+
+	$cas{$line[0]}{$line[1]} = $line[2];
+	$pas{$line[0]}{$line[1]} = $line[2];
+}
+close(CAS);
+close(PAS);

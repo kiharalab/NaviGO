@@ -1,0 +1,206 @@
+#!/usr/bin/perl 
+
+$path = $ARGV[0];
+open (ALL, "<ALLpair_commonAncestor_uniq.txt")|| die "Cannot open BP_related_ancestors.txt file.\n";
+open (PC, "<data/Combined_pc.txt")|| die "Cannot open Combined_pc.txt file.\n";	
+
+open (OUT, ">Semantic_Similarity_Scores.txt") || die "Cannot open out";	#Relevance Similarity
+
+
+my %pc = ();
+@max;
+%zeros;
+
+while ($line = <PC>)
+{
+	chomp $line;
+	@line = split("\t", $line);
+	$pc{$line[0]} = $line[1];
+}
+
+close (PC);
+
+open(CAS, "<data/CAS.txt") || die "Cannot open CAS\n";
+open(PAS, "<data/PAS.txt") || die "Cannot open PAS\n";
+
+my %cas = ();
+my %pas = ();
+
+while(<CAS>)
+{
+	chomp $_;
+	@line = split(" ", $_);
+	$cas{$line[0]}{$line[1]} = $line[2];
+}
+print "compute_allSim.pl : Done loading CAS\n";
+
+while(<PAS>)
+{
+	chomp $_;
+	@line = split(" ", $_);
+	$pas{$line[0]}{$line[1]} = $line[2];
+}
+print "compute_allSim.pl : Done loading PAS\n";
+close(CAS);
+close(PAS);
+
+sub cas
+{
+	$go1 = $_[0];
+	$go2 = $_[1];
+	if(exists($cas{$go1}{$go2}))
+	{
+		$score = $cas{$go1}{$go2};
+		return $score;
+	}
+	if(exists($cas{$go2}{$go2}))
+	{
+		$score = $cas{$go2}{$go1};
+		return $score;
+	}
+	$score = -1;
+	return $score;
+	
+};
+
+sub pas
+{
+	$go1 = $_[0];
+	$go2 = $_[1];
+	if(exists($pas{$go1}{$go2}))
+	{
+		$score = $pas{$go1}{$go2};
+		return $score;
+	}
+	if(exists($pas{$go2}{$go2}))
+	{
+		$score = $pas{$go2}{$go1};
+		return $score;
+	}
+	$score = -1;
+	return $score;
+	
+};
+
+$nl = 0;
+@maxRes = ();
+@maxLin = ();
+@maxRel = ();
+
+while ($line = <ALL>){
+	$count++;
+	chomp $line;
+	@line = split("\t", $line);
+
+#	print "simRel_table_bp.pl : Computing BPsim $nl\n";
+	$nl++;
+
+	$term1 = $line[0];
+	$term2 = $line[1];
+	$ancestors = $line[2];
+
+	if(exists($pc{$term1}))
+	{
+		$score1 = $pc{$term1};
+	}
+	else
+	{
+		die "compute_allSim.pl : Term $term1 does not have a fequency in the database\n";
+	}
+	
+	if(exists($pc{$term2}))
+	{
+		$score2 = $pc{$term2};
+	}
+	else
+	{
+		die "compute_allSim.pl : Term $term2 does not have a fequency in the database\n";
+	}
+
+	print "compute_allSim.pl : term1 ". $term1. " pc1 ". $score1 . " term2 ". $term2. " pc2 ". $score2 . "\n";
+	$a = $b = 0;
+	if($score1 > 0)
+	{
+		$a = (log($score1)/log(10));
+	}
+	if($score2 > 0)
+	{
+		$b = (log($score2)/log(10));
+	}
+	$ic1 = 0 - $a;
+	$ic2 = 0 - $b;
+
+	print OUT "------------------------------------------------\n";
+	print OUT "GO Pair $term1 $term2\n";
+	print OUT "Informataion Content\n$term1 $ic1\n$term2 $ic2\n";
+	
+	@anc = split(",", $ancestors);
+	if(scalar(@anc) == 0)		#OBSOLETE, push root
+	{
+		push @anc, "GO:0008150";
+	}
+	
+	foreach (@anc)
+	{
+		if(exists($pc{$_}))
+		{
+			$ancScore = $pc{$_};
+		}
+		else
+		{
+			print "Ancestor Term $_ does not have a fequency in the database\n";
+			next;
+		}
+		#print "anc term " . $_ ." ancPC " .$ancScore . "\n";
+		$top = 2* (log($ancScore)/log(10));
+		
+		$bottom =  $a + $b;
+		if($bottom == 0)
+		{
+			$bottom = 1;
+		}
+		$first = $top/$bottom;
+		$resnik = 0 - (log($ancScore)/log(10));
+		$lin = $first;
+		$rel = $first * (1-$ancScore);
+		push @maxRes, $resnik;
+		push @maxLin, $lin;
+		push @maxRel, $rel;
+#		print "curr_ss $rel\n";
+	}
+	
+	@maxRes = sort {$a <=> $b} @maxRes;
+	@maxLin = sort {$a <=> $b} @maxLin;
+	@maxRel = sort {$a <=> $b} @maxRel;
+	$max_res = $maxRes[$#maxRes];
+	$max_lin = $maxLin[$#maxLin];
+	$max_rel = $maxRel[$#maxRel];
+
+#	print "$term1\t$term2\t$max_rel\n";
+	print OUT "Resnik Semantic Similarity $max_res\n";
+	print OUT "Lin's Semantic Similarity $max_lin\n";
+	print OUT "Relevance Semantic Similarity $max_rel\n";
+
+	$cas = cas($term1, $term2);
+	$pas = pas($term1, $term2);
+	if($cas > 0)
+	{
+		print OUT "CAS Score $cas\n";
+	}
+	if($pas > 0)
+	{
+		print OUT "PAS Score $pas\n";
+	}
+	@maxRes = ();
+	@maxLin = ();
+	@maxRel = ();
+}
+
+
+close(OUT);
+close(ALL);
+
+%pc = ();
+
+
+

@@ -28,6 +28,7 @@ open(IAS, "<$ias_path") || die "Cannot open IAS\n";
 
 my %cas = ();
 my %pas = ();
+my %ias = ();
 
 if($score_type eq "CAS"){
 	while(<CAS>)
@@ -57,9 +58,9 @@ if($score_type eq "IAS"){
 	{
 		chomp $_;
 		@line = split(" ", $_);
-		$pas{$line[0]}{$line[1]} = $line[2];
+		$ias{$line[0]}{$line[1]} = $line[2];
 	}
-	print "compute_allSim.pl : Done loading PAS\n";
+	print "compute_allSim.pl : Done loading IAS\n";
 }
 
 close(IAS);
@@ -110,14 +111,14 @@ sub ias
 {
 	$go1 = $_[0];
 	$go2 = $_[1];
-	if(exists($pas{$go1}{$go2}))
+	if(exists($ias{$go1}{$go2}))
 	{
-		$score = $pas{$go1}{$go2};
+		$score = $ias{$go1}{$go2};
 		return $score;
 	}
-	if(exists($pas{$go2}{$go2}))
+	if(exists($ias{$go2}{$go2}))
 	{
-		$score = $pas{$go2}{$go1};
+		$score = $ias{$go2}{$go1};
 		return $score;
 	}
 	$score = -1;
