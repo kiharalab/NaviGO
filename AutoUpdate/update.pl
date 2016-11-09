@@ -60,7 +60,6 @@ if (-e $uniprot_base_path)
 }
 
 update_data_fast_funsim($dbname);
-update_auto_update_db_info($dbname, $db_host, $db_login, $db_password, $table);
 cleanup();
 
 sub cleanup() {
@@ -73,27 +72,6 @@ sub update_data_fast_funsim($dbname) {
     `cp -r tmp $dbname`;
 }
 
-sub update_auto_update_db_info($dbname, $db_host, $db_login, $db_password, $table) {
-    my $db=DBI->connect("DBI:mysql:$dbname:$db_host",$db_login,$db_password, { RaiseError => 0, PrintError => 0 });
-    our($sql, $dbq);
-    $sql = "select count(*) from $table;";
-    my ($total) = $db->selectrow_array($sql);
-    #print $total."\n";
-    $sql = "select count(*) from $table where category = \"p\";";
-    my ($bp) = $db->selectrow_array($sql);
-    #print $bp."\n";
-    $sql = "select count(*) from $table where category = \"f\";";
-    my ($mf) = $db->selectrow_array($sql);
-    #print $mf."\n";
-    $sql = "select count(*) from $table where category = \"c\";";
-    my ($cc) = $db->selectrow_array($sql);
-    #print $cc."\n";
-
-    my $query = "insert into pfp_website.auto_update_db(dbname, go_total_num, go_bp_num, go_mf_num, go_cc_num, update_time) 
-            values (?, ?, ?, ?, ?, NOW()) ";
-    my $statement = $db->prepare($query);
-    $statement->execute($dbname, $total, $bp, $mf, $cc);
-}
 
 sub download_go_con ($dbname, $db_login, $db_password) {
     print "Start to download...\n";
