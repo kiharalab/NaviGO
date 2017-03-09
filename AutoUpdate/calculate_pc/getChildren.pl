@@ -1,4 +1,6 @@
 #!/usr/bin/perl
+# NaviGO is  released under the terms of the GNU Lesser General Public License Ver.2.1. 
+# https://www.gnu.org/licenses/old-licenses/lgpl-2.1.en.html
 
 #output format  parentGO \t childGO1, childGO2, ....
 system("sort -k 1 GO_BPO.txt > GO_BPO_sortedP.txt");

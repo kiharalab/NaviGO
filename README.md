@@ -1,5 +1,10 @@
 <h1>NaviGO</h1>
 
+LICENSE
+------
+NaviGO is a tool developed to visualize GO DAG in an interactive way. GO Visualizer is  released under the terms of the GNU Lesser General Public License Ver.2.1. https://www.gnu.org/licenses/old-licenses/lgpl-2.1.en.html
+
+
 Setup
 -----
 Make sure the Perl, Python 2.7, Python 3.4 and MySQL server is set up on your machine or server, first we need to create the database files used for NaviGO, you can clone NaviGO repo with the following command:

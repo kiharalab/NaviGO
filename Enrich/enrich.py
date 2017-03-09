@@ -3,6 +3,8 @@ from urllib.request import urlopen
 from decimal import *
 getcontext().prec = 10
 
+# NaviGO is  released under the terms of the GNU Lesser General Public License Ver.2.1. 
+# https://www.gnu.org/licenses/old-licenses/lgpl-2.1.en.html
 # -------
 # Qing Wei
 

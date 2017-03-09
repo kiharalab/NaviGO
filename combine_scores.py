@@ -5,6 +5,9 @@ import re
 import os
 from sets import Set
 
+# NaviGO is  released under the terms of the GNU Lesser General Public License Ver.2.1. 
+# https://www.gnu.org/licenses/old-licenses/lgpl-2.1.en.html
+
 ext = "_comp.txt"
 
 file_list = ["Human_funsim_scores",\
